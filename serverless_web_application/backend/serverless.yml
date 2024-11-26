@@ -1,0 +1,38 @@
+# backend/serverless.yml
+service: serverless-web-app
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ap-northeast-1
+  environment:
+    NODE_ENV: ${opt:stage, 'dev'}
+
+functions:
+  api:
+    handler: src/index.handler
+    events:
+      - http:
+          path: /api/{proxy+}
+          method: ANY
+          cors: true
+
+plugins:
+  - serverless-webpack
+  - serverless-offline
+  - serverless-localstack
+
+custom:
+  webpack:
+    webpackConfig: webpack.config.js
+    packager: npm
+    includeModules: true
+  localstack:
+    stages:
+      - dev
+    host: http://localhost
+    endpoints:
+      SES: http://localhost:4566
+      Lambda: http://localhost:4566
+      APIGateway: http://localhost:4566
